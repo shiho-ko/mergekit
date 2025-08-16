@@ -49,14 +49,13 @@ def _eval_model(
         if key in kwargs:
             lm_eval_params[key] = kwargs[key]
     
-    # Handle batch_size separately to avoid conflicts
-    if 'batch_size' in kwargs and 'batch_size' not in final_model_args:
-        lm_eval_params['batch_size'] = kwargs['batch_size']
-    
     print(f"🔍 Final parameters:", file=sys.stderr)
     print(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
     print(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
     
+    LOG.info(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
+    LOG.info(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
+
     results = lm_eval.simple_evaluate(
         model=model,
         model_args=final_model_args,
