@@ -34,7 +34,7 @@ def _eval_model(
     # DEBUG: Log all incoming parameters
     import sys
 
-    LOG.info(f"🔍 _eval_model called with: model: {model},  model_args: {model_args}, kwargs: {kwargs}", file=sys.stderr)
+    print(f"🔍 _eval_model called with: model: {model},  model_args: {model_args}, kwargs: {kwargs}", file=sys.stderr)
     
     # Create final model_args by merging and removing duplicates
     final_model_args = dict(model_args) if model_args else {}
@@ -46,10 +46,10 @@ def _eval_model(
     for key in safe_params:
         if key in kwargs:
             lm_eval_params[key] = kwargs[key]
-    
-    
-    LOG.info(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
-    LOG.info(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
+
+
+    print(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
+    print(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
 
     results = lm_eval.simple_evaluate(
         model=model,
@@ -109,7 +109,7 @@ def evaluate_model(
         if 'batch_size' in clean_kwargs:
             del clean_kwargs['batch_size']
 
-        LOG.info(f"clean_kwargs: {clean_kwargs}")
+        print(f"clean_kwargs: {clean_kwargs}")
 
         res = _eval_model(
             "vllm" if vllm else "huggingface",
