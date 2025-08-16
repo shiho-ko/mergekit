@@ -112,19 +112,19 @@ class OnDiskMergeEvaluator(MergeActorBase):
         LOG.info(f"Model merged to {merged_path}")
         LOG.info(f"model_kwargs: {model_kwargs}")
 
+        if self.vllm:
+            model_kwargs["batch_size"] = self.batch_size 
+
         return evaluate_model(
             merged_path,
             self.config.tasks,
             num_fewshot=self.config.num_fewshot,
             limit=self.config.limit,
             vllm=self.vllm,
-            # batch_size=self.batch_size,
-            batch_size=None,  # Explicitly pass None to avoid device conflicts
             task_manager=self.task_manager,
             apply_chat_template=self.config.apply_chat_template,
             fewshot_as_multiturn=self.config.fewshot_as_multiturn,
             model_kwargs=model_kwargs,
-            # Don't pass device here - it's already in model_args
         )
 
 
