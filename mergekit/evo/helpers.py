@@ -96,17 +96,20 @@ def evaluate_model(
             **(model_kwargs or {}),
         }
         
-        # Set device if not already specified, ensure it's a string
-        if "device" not in model_args:
-            model_args["device"] = device
-        elif not isinstance(model_args["device"], str):
-            model_args["device"] = str(model_args["device"])
         if vllm:
+            # vLLM specific settings
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
             model_args["max_model_len"] = 4096
-            # vLLM handles batch_size internally - don't set it here
+            # vLLM might handle device differently - remove it to avoid conflicts
+            if "device" in model_args:
+                del model_args["device"]
         else:
+            # HuggingFace model needs device
+            if "device" not in model_args:
+                model_args["device"] = device
+            elif not isinstance(model_args["device"], str):
+                model_args["device"] = str(model_args["device"])
             model_args["use_cache"] = True
 
         # Remove any model-specific parameters from kwargs to avoid conflicts
