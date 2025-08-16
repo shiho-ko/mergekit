@@ -97,7 +97,6 @@ def evaluate_model(
         if vllm:
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
-            model_args["batch_size"] = batch_size or "auto"
             model_args["max_model_len"] = 4096
         else:
             model_args["use_cache"] = True
