@@ -106,9 +106,12 @@ class OnDiskMergeEvaluator(MergeActorBase):
         model_kwargs = {}
         if self.quantization_config is not None:
             model_kwargs["quantization_config"] = self.quantization_config
+
+        if self.vllm:
+            model_kwargs["batch_size"] = self.batch_size
         LOG.info(f"Model merged to {merged_path}")
-        
-        
+        LOG.info(f"model_kwargs: {model_kwargs}")
+
         return evaluate_model(
             merged_path,
             self.config.tasks,
