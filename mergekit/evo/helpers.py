@@ -30,20 +30,27 @@ def _eval_model(
     task_manager: Optional[lm_eval.tasks.TaskManager] = None,
     **kwargs,
 ) -> Dict[str, Any]:
-    # Extract lm_eval specific parameters from kwargs
+    # Create final model_args by merging and removing duplicates
+    final_model_args = dict(model_args) if model_args else {}
+    
+    # Extract lm_eval specific parameters from kwargs, avoid duplication with model_args
     lm_eval_params = {}
+    # List of parameters that could conflict between model_args and kwargs
+    model_only_params = {'device', 'dtype', 'pretrained', 'gpu_memory_utilization', 
+                        'tensor_parallel_size', 'max_model_len', 'use_cache'}
+    
     for key in ['num_fewshot', 'limit', 'batch_size', 'apply_chat_template', 'fewshot_as_multiturn']:
-        if key in kwargs:
+        if key in kwargs and key not in final_model_args and key not in model_only_params:
             lm_eval_params[key] = kwargs[key]
     
     results = lm_eval.simple_evaluate(
         model=model,
-        model_args=model_args,  # Only pass model_args, no kwargs
+        model_args=final_model_args,
         tasks=list(set([task.name for task in tasks])),
         log_samples=False,
         verbosity="WARNING",
         task_manager=task_manager,
-        **lm_eval_params,  # Pass only lm_eval specific parameters
+        **lm_eval_params,
     )
 
     logging.info(results["results"])
