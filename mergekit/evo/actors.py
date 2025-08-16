@@ -341,7 +341,7 @@ class InMemoryMergeEvaluator(MergeActorBase):
         return _eval_model(
             self.model,
             self.config.tasks,
-            model_args=None,  # Explicitly pass None to avoid device conflicts
+            model_args={},  # Explicitly pass empty dict to avoid device conflicts
             num_fewshot=self.config.num_fewshot,
             limit=self.config.limit,
             task_manager=self.task_manager,
