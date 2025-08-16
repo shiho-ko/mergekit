@@ -80,6 +80,9 @@ def evaluate_model(
         else:
             model_args["use_cache"] = True
 
+        # Remove device from kwargs to avoid duplicate parameter
+        eval_kwargs = {k: v for k, v in kwargs.items() if k != "device"}
+        
         res = _eval_model(
             "vllm" if vllm else "huggingface",
             tasks,
@@ -88,7 +91,7 @@ def evaluate_model(
             limit=limit,
             batch_size=batch_size,
             task_manager=task_manager,
-            **kwargs,
+            **eval_kwargs,
         )
         return res
     finally:
