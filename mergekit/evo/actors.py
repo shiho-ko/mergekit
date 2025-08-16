@@ -243,7 +243,7 @@ class InMemoryMergeEvaluator(MergeActorBase):
                     max_model_len=max_model_len,
                     gpu_memory_utilization=mem_util,
                     dtype="bfloat16",
-                    device=self.merge_options.device,
+                    # device=self.merge_options.device,
                     trust_remote_code=self.merge_options.trust_remote_code,
                 )
         else:
@@ -345,7 +345,8 @@ class InMemoryMergeEvaluator(MergeActorBase):
             num_fewshot=self.config.num_fewshot,
             limit=self.config.limit,
             task_manager=self.task_manager,
-            batch_size=self.batch_size,
+            # batch_size=self.batch_size,
+            batch_size=None,
             apply_chat_template=self.config.apply_chat_template,
             fewshot_as_multiturn=self.config.fewshot_as_multiturn,
         )
