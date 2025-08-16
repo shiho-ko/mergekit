@@ -107,6 +107,16 @@ class OnDiskMergeEvaluator(MergeActorBase):
         if self.quantization_config is not None:
             model_kwargs["quantization_config"] = self.quantization_config
         LOG.info(f"Model merged to {merged_path}")
+        
+        # DEBUG: Print parameters before calling evaluate_model
+        print(f"🔍 DEBUG OnDiskMergeEvaluator - calling evaluate_model with:")
+        print(f"🔍   merged_path: {merged_path}")
+        print(f"🔍   vllm: {self.vllm}")
+        print(f"🔍   batch_size: {self.batch_size}")
+        print(f"🔍   apply_chat_template: {self.config.apply_chat_template}")
+        print(f"🔍   fewshot_as_multiturn: {self.config.fewshot_as_multiturn}")
+        print(f"🔍   model_kwargs: {model_kwargs}")
+        
         return evaluate_model(
             merged_path,
             self.config.tasks,

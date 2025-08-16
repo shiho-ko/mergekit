@@ -30,13 +30,13 @@ def _eval_model(
     task_manager: Optional[lm_eval.tasks.TaskManager] = None,
     **kwargs,
 ) -> Dict[str, Any]:
-    # DEBUG: Log all parameters to identify device conflicts
-    logging.warning(f"DEBUG _eval_model - model_args: {model_args}")
-    logging.warning(f"DEBUG _eval_model - kwargs: {kwargs}")
+    # DEBUG: Print all parameters to identify device conflicts
+    print(f"🔍 DEBUG _eval_model - model_args: {model_args}")
+    print(f"🔍 DEBUG _eval_model - kwargs: {kwargs}")
     
     # Remove device from kwargs to avoid conflict with model_args
     eval_kwargs = {k: v for k, v in kwargs.items() if k != "device"}
-    logging.warning(f"DEBUG _eval_model - eval_kwargs after device removal: {eval_kwargs}")
+    print(f"🔍 DEBUG _eval_model - eval_kwargs after device removal: {eval_kwargs}")
     
     results = lm_eval.simple_evaluate(
         model=model,
@@ -66,9 +66,9 @@ def evaluate_model(
     model_kwargs: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> dict:
-    # DEBUG: Log initial parameters
-    logging.warning(f"DEBUG evaluate_model - model_kwargs: {model_kwargs}")
-    logging.warning(f"DEBUG evaluate_model - kwargs: {kwargs}")
+    # DEBUG: Print initial parameters
+    print(f"🔍 DEBUG evaluate_model - model_kwargs: {model_kwargs}")
+    print(f"🔍 DEBUG evaluate_model - kwargs: {kwargs}")
     
     # monkeypatch_tqdm()
     monkeypatch_lmeval_vllm()
@@ -79,7 +79,7 @@ def evaluate_model(
             "dtype": "bfloat16",
             **(model_kwargs or {}),
         }
-        logging.warning(f"DEBUG evaluate_model - model_args after creation: {model_args}")
+        print(f"🔍 DEBUG evaluate_model - model_args after creation: {model_args}")
         
         # Set device if not already specified, ensure it's a string
         if "device" not in model_args:
@@ -87,7 +87,7 @@ def evaluate_model(
         elif not isinstance(model_args["device"], str):
             model_args["device"] = str(model_args["device"])
         
-        logging.warning(f"DEBUG evaluate_model - final model_args: {model_args}")
+        print(f"🔍 DEBUG evaluate_model - final model_args: {model_args}")
         if vllm:
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
