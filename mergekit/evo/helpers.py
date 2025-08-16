@@ -30,6 +30,9 @@ def _eval_model(
     task_manager: Optional[lm_eval.tasks.TaskManager] = None,
     **kwargs,
 ) -> Dict[str, Any]:
+    # Remove device from kwargs to avoid conflict with model_args
+    eval_kwargs = {k: v for k, v in kwargs.items() if k != "device"}
+    
     results = lm_eval.simple_evaluate(
         model=model,
         model_args=model_args,
@@ -37,7 +40,7 @@ def _eval_model(
         log_samples=False,
         verbosity="WARNING",
         task_manager=task_manager,
-        **kwargs,
+        **eval_kwargs,
     )
 
     logging.info(results["results"])
