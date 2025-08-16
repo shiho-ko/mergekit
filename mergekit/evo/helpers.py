@@ -65,11 +65,12 @@ def evaluate_model(
         model_args = {
             "pretrained": merged_path,
             "dtype": "bfloat16",
-            "device": device,
             **(model_kwargs or {}),
         }
-        # Ensure device is always a string
-        if "device" in model_args and not isinstance(model_args["device"], str):
+        # Set device if not already specified, ensure it's a string
+        if "device" not in model_args:
+            model_args["device"] = device
+        elif not isinstance(model_args["device"], str):
             model_args["device"] = str(model_args["device"])
         if vllm:
             model_args["gpu_memory_utilization"] = 0.8
