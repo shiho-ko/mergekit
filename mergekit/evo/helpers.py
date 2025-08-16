@@ -30,22 +30,22 @@ def _eval_model(
     task_manager: Optional[lm_eval.tasks.TaskManager] = None,
     **kwargs,
 ) -> Dict[str, Any]:
-    # DEBUG: Print all parameters to identify device conflicts
-    print(f"🔍 DEBUG _eval_model - model_args: {model_args}")
-    print(f"🔍 DEBUG _eval_model - kwargs: {kwargs}")
-    
-    # Remove device from kwargs to avoid conflict with model_args
-    eval_kwargs = {k: v for k, v in kwargs.items() if k != "device"}
-    print(f"🔍 DEBUG _eval_model - eval_kwargs after device removal: {eval_kwargs}")
+    # Merge model_args into kwargs to avoid duplicate parameters
+    if model_args:
+        # Start with kwargs, then update with model_args (model_args takes precedence)
+        merged_kwargs = dict(kwargs)
+        merged_kwargs.update(model_args)
+    else:
+        merged_kwargs = dict(kwargs)
     
     results = lm_eval.simple_evaluate(
         model=model,
-        model_args=model_args,
+        model_args=merged_kwargs,  # Pass everything as model_args
         tasks=list(set([task.name for task in tasks])),
         log_samples=False,
         verbosity="WARNING",
         task_manager=task_manager,
-        **eval_kwargs,
+        # Don't pass **kwargs here to avoid duplication
     )
 
     logging.info(results["results"])
@@ -66,10 +66,6 @@ def evaluate_model(
     model_kwargs: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> dict:
-    # DEBUG: Print initial parameters
-    print(f"🔍 DEBUG evaluate_model - model_kwargs: {model_kwargs}")
-    print(f"🔍 DEBUG evaluate_model - kwargs: {kwargs}")
-    
     # monkeypatch_tqdm()
     monkeypatch_lmeval_vllm()
     try:
@@ -79,15 +75,12 @@ def evaluate_model(
             "dtype": "bfloat16",
             **(model_kwargs or {}),
         }
-        print(f"🔍 DEBUG evaluate_model - model_args after creation: {model_args}")
         
         # Set device if not already specified, ensure it's a string
         if "device" not in model_args:
             model_args["device"] = device
         elif not isinstance(model_args["device"], str):
             model_args["device"] = str(model_args["device"])
-        
-        print(f"🔍 DEBUG evaluate_model - final model_args: {model_args}")
         if vllm:
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
@@ -96,9 +89,6 @@ def evaluate_model(
         else:
             model_args["use_cache"] = True
 
-        # Remove device from kwargs to avoid duplicate parameter
-        eval_kwargs = {k: v for k, v in kwargs.items() if k != "device"}
-        
         res = _eval_model(
             "vllm" if vllm else "huggingface",
             tasks,
@@ -107,7 +97,7 @@ def evaluate_model(
             limit=limit,
             batch_size=batch_size,
             task_manager=task_manager,
-            **eval_kwargs,
+            **kwargs,
         )
         return res
     finally:
