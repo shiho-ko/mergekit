@@ -44,9 +44,14 @@ def _eval_model(
     
     # For vLLM, handle batch_size specially
     if model == "vllm":
-        # vLLM might handle batch_size differently
+        # vLLM needs batch_size but it should be "auto" or a number, not None
         safe_params = ['num_fewshot', 'limit', 'apply_chat_template', 'fewshot_as_multiturn']
-        # Don't pass batch_size through lm_eval_params for vLLM
+        # Handle batch_size separately for vLLM
+        if 'batch_size' in kwargs:
+            # If batch_size is None or not provided, use "auto"
+            lm_eval_params['batch_size'] = kwargs['batch_size'] if kwargs['batch_size'] is not None else "auto"
+        else:
+            lm_eval_params['batch_size'] = "auto"
     else:
         safe_params = ['num_fewshot', 'limit', 'batch_size', 'apply_chat_template', 'fewshot_as_multiturn']
     
