@@ -33,10 +33,8 @@ def _eval_model(
 ) -> Dict[str, Any]:
     # DEBUG: Log all incoming parameters
     import sys
-    print(f"🔍 _eval_model called with:", file=sys.stderr)
-    print(f"🔍   model: {model}", file=sys.stderr)
-    print(f"🔍   model_args: {model_args}", file=sys.stderr)
-    print(f"🔍   kwargs: {kwargs}", file=sys.stderr)
+
+    LOG.info(f"🔍 _eval_model called with: model: {model},  model_args: {model_args}, kwargs: {kwargs}", file=sys.stderr)
     
     # Create final model_args by merging and removing duplicates
     final_model_args = dict(model_args) if model_args else {}
@@ -49,9 +47,6 @@ def _eval_model(
         if key in kwargs:
             lm_eval_params[key] = kwargs[key]
     
-    print(f"🔍 Final parameters:", file=sys.stderr)
-    print(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
-    print(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
     
     LOG.info(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
     LOG.info(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
