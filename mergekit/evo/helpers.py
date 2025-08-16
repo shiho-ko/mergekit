@@ -98,6 +98,7 @@ def evaluate_model(
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
             model_args["max_model_len"] = 4096
+            model_args["batch_size"] = batch_size or "auto"
         else:
             model_args["use_cache"] = True
 
@@ -105,8 +106,6 @@ def evaluate_model(
         clean_kwargs = {k: v for k, v in kwargs.items() 
                        if k not in ['device', 'dtype', 'pretrained', 'gpu_memory_utilization',
                                    'tensor_parallel_size', 'max_model_len', 'use_cache']}
-        if 'batch_size' in clean_kwargs:
-            del clean_kwargs['batch_size']
 
         print(f"clean_kwargs: {clean_kwargs}")
 
