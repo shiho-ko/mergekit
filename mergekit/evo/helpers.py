@@ -22,6 +22,7 @@ from mergekit.evo.monkeypatch import monkeypatch_lmeval_vllm
 from mergekit.merge import run_merge
 from mergekit.options import MergeOptions
 
+LOG = logging.getLogger(__name__)
 
 def _eval_model(
     model: Union[str, lm_eval.api.model.LM],
@@ -102,7 +103,7 @@ def evaluate_model(
         if vllm:
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
-            model_args["batch_size"] = "auto"
+            model_args["batch_size"] = batch_size or "auto"
             model_args["max_model_len"] = 4096
         else:
             model_args["use_cache"] = True
@@ -111,14 +112,17 @@ def evaluate_model(
         clean_kwargs = {k: v for k, v in kwargs.items() 
                        if k not in ['device', 'dtype', 'pretrained', 'gpu_memory_utilization',
                                    'tensor_parallel_size', 'max_model_len', 'use_cache']}
-        
+        if 'batch_size' in clean_kwargs:
+            del clean_kwargs['batch_size']
+
+        LOG.info(f"clean_kwargs: {clean_kwargs}")
+
         res = _eval_model(
             "vllm" if vllm else "huggingface",
             tasks,
             model_args,
             num_fewshot=num_fewshot,
             limit=limit,
-            batch_size=batch_size,
             task_manager=task_manager,
             **clean_kwargs,
         )

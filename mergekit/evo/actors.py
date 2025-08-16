@@ -112,9 +112,6 @@ class OnDiskMergeEvaluator(MergeActorBase):
         LOG.info(f"Model merged to {merged_path}")
         LOG.info(f"model_kwargs: {model_kwargs}")
 
-        if self.vllm:
-            model_kwargs["batch_size"] = self.batch_size 
-
         return evaluate_model(
             merged_path,
             self.config.tasks,
