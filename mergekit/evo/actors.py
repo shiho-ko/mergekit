@@ -120,6 +120,7 @@ class OnDiskMergeEvaluator(MergeActorBase):
             apply_chat_template=self.config.apply_chat_template,
             fewshot_as_multiturn=self.config.fewshot_as_multiturn,
             model_kwargs=model_kwargs,
+            # Don't pass device here - it's already in model_args
         )
 
 

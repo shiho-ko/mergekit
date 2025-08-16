@@ -30,18 +30,31 @@ def _eval_model(
     task_manager: Optional[lm_eval.tasks.TaskManager] = None,
     **kwargs,
 ) -> Dict[str, Any]:
+    # DEBUG: Log all incoming parameters
+    import sys
+    print(f"🔍 _eval_model called with:", file=sys.stderr)
+    print(f"🔍   model: {model}", file=sys.stderr)
+    print(f"🔍   model_args: {model_args}", file=sys.stderr)
+    print(f"🔍   kwargs: {kwargs}", file=sys.stderr)
+    
     # Create final model_args by merging and removing duplicates
     final_model_args = dict(model_args) if model_args else {}
     
-    # Extract lm_eval specific parameters from kwargs, avoid duplication with model_args
+    # Extract only safe lm_eval parameters from kwargs
     lm_eval_params = {}
-    # List of parameters that could conflict between model_args and kwargs
-    model_only_params = {'device', 'dtype', 'pretrained', 'gpu_memory_utilization', 
-                        'tensor_parallel_size', 'max_model_len', 'use_cache'}
+    safe_params = ['num_fewshot', 'limit', 'apply_chat_template', 'fewshot_as_multiturn']
     
-    for key in ['num_fewshot', 'limit', 'batch_size', 'apply_chat_template', 'fewshot_as_multiturn']:
-        if key in kwargs and key not in final_model_args and key not in model_only_params:
+    for key in safe_params:
+        if key in kwargs:
             lm_eval_params[key] = kwargs[key]
+    
+    # Handle batch_size separately to avoid conflicts
+    if 'batch_size' in kwargs and 'batch_size' not in final_model_args:
+        lm_eval_params['batch_size'] = kwargs['batch_size']
+    
+    print(f"🔍 Final parameters:", file=sys.stderr)
+    print(f"🔍   final_model_args: {final_model_args}", file=sys.stderr)
+    print(f"🔍   lm_eval_params: {lm_eval_params}", file=sys.stderr)
     
     results = lm_eval.simple_evaluate(
         model=model,
@@ -94,6 +107,11 @@ def evaluate_model(
         else:
             model_args["use_cache"] = True
 
+        # Remove any model-specific parameters from kwargs to avoid conflicts
+        clean_kwargs = {k: v for k, v in kwargs.items() 
+                       if k not in ['device', 'dtype', 'pretrained', 'gpu_memory_utilization',
+                                   'tensor_parallel_size', 'max_model_len', 'use_cache']}
+        
         res = _eval_model(
             "vllm" if vllm else "huggingface",
             tasks,
@@ -102,7 +120,7 @@ def evaluate_model(
             limit=limit,
             batch_size=batch_size,
             task_manager=task_manager,
-            **kwargs,
+            **clean_kwargs,
         )
         return res
     finally:
