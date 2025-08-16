@@ -115,7 +115,8 @@ class OnDiskMergeEvaluator(MergeActorBase):
             num_fewshot=self.config.num_fewshot,
             limit=self.config.limit,
             vllm=self.vllm,
-            batch_size=self.batch_size,
+            # batch_size=self.batch_size,
+            batch_size=None,  # Explicitly pass None to avoid device conflicts
             task_manager=self.task_manager,
             apply_chat_template=self.config.apply_chat_template,
             fewshot_as_multiturn=self.config.fewshot_as_multiturn,
