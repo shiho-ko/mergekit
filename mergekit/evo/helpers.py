@@ -41,7 +41,7 @@ def _eval_model(
     
     # Extract only safe lm_eval parameters from kwargs
     lm_eval_params = {}
-    safe_params = ['num_fewshot', 'limit', 'apply_chat_template', 'fewshot_as_multiturn']
+    safe_params = ['num_fewshot', 'limit', 'batch_size', 'apply_chat_template', 'fewshot_as_multiturn']
     
     for key in safe_params:
         if key in kwargs:
@@ -98,7 +98,7 @@ def evaluate_model(
             model_args["gpu_memory_utilization"] = 0.8
             model_args["tensor_parallel_size"] = 1
             model_args["max_model_len"] = 4096
-            model_args["batch_size"] = batch_size or "auto"
+            # Don't set batch_size in model_args for vLLM - it should be passed as a separate parameter
         else:
             model_args["use_cache"] = True
 
@@ -115,6 +115,7 @@ def evaluate_model(
             model_args,
             num_fewshot=num_fewshot,
             limit=limit,
+            batch_size=batch_size,  # Add batch_size back as a parameter
             task_manager=task_manager,
             **clean_kwargs,
         )
