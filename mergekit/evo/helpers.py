@@ -30,22 +30,20 @@ def _eval_model(
     task_manager: Optional[lm_eval.tasks.TaskManager] = None,
     **kwargs,
 ) -> Dict[str, Any]:
-    # Merge model_args into kwargs to avoid duplicate parameters
-    if model_args:
-        # Start with kwargs, then update with model_args (model_args takes precedence)
-        merged_kwargs = dict(kwargs)
-        merged_kwargs.update(model_args)
-    else:
-        merged_kwargs = dict(kwargs)
+    # Extract lm_eval specific parameters from kwargs
+    lm_eval_params = {}
+    for key in ['num_fewshot', 'limit', 'batch_size', 'apply_chat_template', 'fewshot_as_multiturn']:
+        if key in kwargs:
+            lm_eval_params[key] = kwargs[key]
     
     results = lm_eval.simple_evaluate(
         model=model,
-        model_args=merged_kwargs,  # Pass everything as model_args
+        model_args=model_args,  # Only pass model_args, no kwargs
         tasks=list(set([task.name for task in tasks])),
         log_samples=False,
         verbosity="WARNING",
         task_manager=task_manager,
-        # Don't pass **kwargs here to avoid duplication
+        **lm_eval_params,  # Pass only lm_eval specific parameters
     )
 
     logging.info(results["results"])
